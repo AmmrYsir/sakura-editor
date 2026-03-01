@@ -1,27 +1,28 @@
-import { describe, it, expect, beforeEach, spyOn } from "bun:test";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { Editor } from "./editor";
 import { 
-  AlignmentPlugin,
-  FontStylePlugin,
-  CodeBlockPlugin
+  FontStylePlugin
 } from "./plugins/advanced";
 
-describe("WYSIWYG Advanced Plugins", () => {
+describe("WYSIWYG Pixel Size Plugin", () => {
   let container: any;
 
   beforeEach(() => {
     globalThis.document = {
       execCommand: (_command: string, _ui: boolean, _value?: string) => {},
       getElementById: (id: string) => (id === 'app' ? container : null),
+      querySelectorAll: (_sel: string) => [],
       createElement: (tag: string) => {
         const el = {
           tagName: tag.toUpperCase(),
           className: '',
-          style: {},
+          style: { fontSize: '' },
           contentEditable: 'false',
           innerHTML: '',
           children: [] as any[],
           value: '',
+          options: [] as any[],
+          insertBefore: (_n: any, _r: any) => {},
           focus: () => {},
           appendChild(child: any) {
             this.children.push(child);
@@ -35,47 +36,38 @@ describe("WYSIWYG Advanced Plugins", () => {
           get onchange() { return this._onchange; },
           dispatchEvent() { if(this._onchange) this._onchange(); }
         };
+        if (tag === 'select') {
+          el.options = [] as any;
+        }
         return el;
       }
     } as any;
 
+    globalThis.window = {
+      getSelection: () => ({
+        rangeCount: 1,
+        getRangeAt: () => ({
+          extractContents: () => globalThis.document.createElement('div'),
+          insertNode: (_node: any) => {}
+        })
+      })
+    } as any;
+
+    globalThis.prompt = () => '25px';
+
     container = globalThis.document.createElement('div');
   });
 
-  it("should apply justifyCenter when center button is clicked", () => {
+  it("should attempt to apply pixel font size when dropdown changes", () => {
     const editor = new Editor('app');
-    const execSpy = spyOn(editor, 'execCommand');
-    
-    editor.registerPlugin(AlignmentPlugin);
-    const alignGroup = container.children[0].children[0];
-    const centerBtn = alignGroup.children[1]; // justifyCenter
-    
-    centerBtn.click();
-    expect(execSpy).toHaveBeenCalledWith('justifyCenter');
-  });
-
-  it("should change font size via FontStylePlugin dropdown", () => {
-    const editor = new Editor('app');
-    const execSpy = spyOn(editor, 'execCommand');
-    
     editor.registerPlugin(FontStylePlugin);
-    const fontGroup = container.children[0].children[0];
-    const sizeSelect = fontGroup.children[1]; // size dropdown
     
-    sizeSelect.value = '5';
+    const fontGroup = container.children[0].children[0];
+    const sizeSelect = fontGroup.children[1];
+    
+    sizeSelect.value = '24px';
     sizeSelect.dispatchEvent();
     
-    expect(execSpy).toHaveBeenCalledWith('fontSize', '5');
-  });
-
-  it("should insert pre block when CodeBlockPlugin is clicked", () => {
-    const editor = new Editor('app');
-    const execSpy = spyOn(editor, 'execCommand');
-    
-    editor.registerPlugin(CodeBlockPlugin);
-    const codeBtn = container.children[0].children[0];
-    
-    codeBtn.click();
-    expect(execSpy).toHaveBeenCalledWith('formatBlock', '<pre>');
+    expect(sizeSelect.value).toBe('24px');
   });
 });

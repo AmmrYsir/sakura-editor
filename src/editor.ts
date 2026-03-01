@@ -46,6 +46,7 @@ export class Editor {
   }
 
   public execCommand(command: string, value?: string) {
+    if (command === 'noop') return;
     this.element.focus();
     document.execCommand(command, false, value);
   }

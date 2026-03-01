@@ -27,6 +27,34 @@ export const AlignmentPlugin: Plugin = {
   }
 };
 
+// Helper to apply pixel font size since execCommand 'fontSize' only supports 1-7
+const applyPixelFontSize = (editor: Editor, size: string) => {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+
+  const range = selection.getRangeAt(0);
+  const span = document.createElement('span');
+  span.style.fontSize = size.endsWith('px') ? size : `${size}px`;
+  
+  try {
+    span.appendChild(range.extractContents());
+    range.insertNode(span);
+    editor.execCommand('noop');
+  } catch (e) {
+    document.execCommand('fontSize', false, '7');
+    const fonts = document.querySelectorAll('font[size="7"]');
+    fonts.forEach(f => {
+      const el = f as HTMLElement;
+      el.removeAttribute('size');
+      el.style.fontSize = span.style.fontSize;
+      const newSpan = document.createElement('span');
+      newSpan.style.fontSize = el.style.fontSize;
+      newSpan.innerHTML = el.innerHTML;
+      el.parentNode?.replaceChild(newSpan, el);
+    });
+  }
+};
+
 // --- Font Style Plugin (Family & Size) ---
 export const FontStylePlugin: Plugin = {
   name: 'FontStyle',
@@ -38,7 +66,7 @@ export const FontStylePlugin: Plugin = {
     // Font Family
     const familySelect = document.createElement('select');
     familySelect.className = 'editor-select';
-    ['Arial', 'Times New Roman', 'Courier New', 'Georgia'].forEach(f => {
+    ['Arial', 'Inter', 'Times New Roman', 'Courier New', 'Georgia'].forEach(f => {
       const opt = document.createElement('option');
       opt.value = f;
       opt.innerText = f;
@@ -46,17 +74,41 @@ export const FontStylePlugin: Plugin = {
     });
     familySelect.onchange = () => (FontStylePlugin as any).editor.execCommand('fontName', familySelect.value);
 
-    // Font Size
+    // Font Size (Pixels)
     const sizeSelect = document.createElement('select');
     sizeSelect.className = 'editor-select';
-    [1, 2, 3, 4, 5, 6, 7].forEach(s => {
+    
+    const sizes = ['8px', '10px', '12px', '14px', '16px', '18px', '20px', '24px', '32px', '48px', 'Custom...'];
+    
+    sizes.forEach(s => {
       const opt = document.createElement('option');
-      opt.value = s.toString();
-      opt.innerText = `Size ${s}`;
-      if (s === 3) opt.selected = true;
+      opt.value = s;
+      opt.innerText = s;
+      if (s === '16px') opt.selected = true;
       sizeSelect.appendChild(opt);
     });
-    sizeSelect.onchange = () => (FontStylePlugin as any).editor.execCommand('fontSize', sizeSelect.value);
+
+    sizeSelect.onchange = () => {
+      let val = sizeSelect.value;
+      if (val === 'Custom...') {
+        const custom = prompt('Enter custom pixel size (e.g. 25px)', '25px');
+        if (custom) {
+          val = custom;
+          const exists = Array.from(sizeSelect.options).some(o => o.value === val);
+          if (!exists) {
+            const newOpt = document.createElement('option');
+            newOpt.value = val;
+            newOpt.innerText = val;
+            sizeSelect.insertBefore(newOpt, sizeSelect.lastChild);
+            newOpt.selected = true;
+          }
+        } else {
+          sizeSelect.value = '16px';
+          return;
+        }
+      }
+      applyPixelFontSize((FontStylePlugin as any).editor, val);
+    };
 
     container.appendChild(familySelect);
     container.appendChild(sizeSelect);
