@@ -35,6 +35,11 @@ export class Editor {
     }
   }
 
+  public execCommand(command: string, value?: string) {
+    this.element.focus();
+    document.execCommand(command, false, value);
+  }
+
   public getPlugins() {
     return Array.from(this.plugins.values());
   }

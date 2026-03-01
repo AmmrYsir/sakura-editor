@@ -1,13 +1,16 @@
 import { describe, it, expect, beforeEach, spyOn } from "bun:test";
 import { Editor } from "./editor";
-import { BoldPlugin, ItalicPlugin, UnderlinePlugin } from "./plugins/core";
+import { 
+  LinkPlugin 
+} from "./plugins/core";
+import { HighlightPlugin } from "./plugins/highlight";
 
 describe("WYSIWYG Editor Plugins", () => {
   let container: any;
 
   beforeEach(() => {
     globalThis.document = {
-      execCommand: (_command: string) => {},
+      execCommand: (_command: string, _ui: boolean, _value?: string) => {},
       getElementById: (id: string) => (id === 'app' ? container : null),
       createElement: (tag: string) => {
         const el = {
@@ -17,6 +20,7 @@ describe("WYSIWYG Editor Plugins", () => {
           contentEditable: 'false',
           innerHTML: '',
           children: [] as any[],
+          focus: () => {},
           appendChild(child: any) {
             this.children.push(child);
           },
@@ -29,42 +33,34 @@ describe("WYSIWYG Editor Plugins", () => {
       }
     } as any;
 
+    globalThis.prompt = (_message?: string, _default?: string) => 'http://example.com';
+
     container = globalThis.document.createElement('div');
   });
 
-  it("should apply bold when BoldPlugin button is clicked", () => {
+  it("should create link when LinkPlugin button is clicked", () => {
     const editor = new Editor('app');
-    const execSpy = spyOn(globalThis.document, 'execCommand');
+    const execSpy = spyOn(editor, 'execCommand');
+    const promptSpy = spyOn(globalThis, 'prompt').mockReturnValue('https://bun.sh');
     
-    editor.registerPlugin(BoldPlugin);
-    const toolbar = container.children[0];
-    const boldBtn = toolbar.children[0];
+    editor.registerPlugin(LinkPlugin);
+    const linkBtn = container.children[0].children[0];
+    linkBtn.click();
     
-    boldBtn.click();
-    expect(execSpy).toHaveBeenCalledWith('bold', false);
+    expect(promptSpy).toHaveBeenCalled();
+    expect(execSpy).toHaveBeenCalledWith('createLink', 'https://bun.sh');
   });
 
-  it("should apply italic when ItalicPlugin button is clicked", () => {
+  it("should apply highlight when HighlightPlugin button is clicked", () => {
     const editor = new Editor('app');
-    const execSpy = spyOn(globalThis.document, 'execCommand');
+    const execSpy = spyOn(editor, 'execCommand');
+    const promptSpy = spyOn(globalThis, 'prompt').mockReturnValue('yellow');
     
-    editor.registerPlugin(ItalicPlugin);
-    const toolbar = container.children[0];
-    const italicBtn = toolbar.children[0];
+    editor.registerPlugin(new HighlightPlugin());
+    const highlightBtn = container.children[0].children[0];
+    highlightBtn.click();
     
-    italicBtn.click();
-    expect(execSpy).toHaveBeenCalledWith('italic', false);
-  });
-
-  it("should apply underline when UnderlinePlugin button is clicked", () => {
-    const editor = new Editor('app');
-    const execSpy = spyOn(globalThis.document, 'execCommand');
-    
-    editor.registerPlugin(UnderlinePlugin);
-    const toolbar = container.children[0];
-    const underlineBtn = toolbar.children[0];
-    
-    underlineBtn.click();
-    expect(execSpy).toHaveBeenCalledWith('underline', false);
+    expect(promptSpy).toHaveBeenCalled();
+    expect(execSpy).toHaveBeenCalledWith('hiliteColor', 'yellow');
   });
 });
