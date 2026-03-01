@@ -17,19 +17,28 @@ import {
 
 const editor = new Editor('app')
 
-// Register Plugins
-editor.registerPlugin(FontStylePlugin) // Dropdowns first
+// Group 1: Typography
+editor.registerPlugin(FontStylePlugin)
+editor.addDivider()
+
+// Group 2: Basic Formatting
 editor.registerPlugin(BoldPlugin)
 editor.registerPlugin(ItalicPlugin)
 editor.registerPlugin(UnderlinePlugin)
+editor.registerPlugin(new HighlightPlugin())
+editor.addDivider()
+
+// Group 3: Paragraph & Lists
 editor.registerPlugin(AlignmentPlugin)
 editor.registerPlugin(ListPlugin)
+editor.addDivider()
+
+// Group 4: Insert
 editor.registerPlugin(LinkPlugin)
 editor.registerPlugin(ImagePlugin)
-editor.registerPlugin(new HighlightPlugin())
 editor.registerPlugin(CodeBlockPlugin)
 
-// Example of a custom "plugin" created inline to show extensibility
+// Final Tool: Clear (Pinned to Right via CSS auto margin)
 editor.registerPlugin({
   name: 'ClearContent',
   init: () => {},
@@ -48,4 +57,11 @@ editor.registerPlugin({
   }
 })
 
-editor.setContent('<h1>Welcome to Sakura Editor</h1><p>Start typing here...</p>')
+editor.setContent(`
+  <h1>Sakura Editor Redesign</h1>
+  <p>The toolbar has been redesigned for a <strong>modern, clean, and organized</strong> experience.</p>
+  <blockquote>Plugins are now logically grouped with subtle dividers and refined spacing.</blockquote>
+  <pre><code>// Example code block
+const sakura = "🌸";
+console.log("Welcome to Sakura Editor!");</code></pre>
+`)

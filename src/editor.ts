@@ -35,6 +35,12 @@ export class Editor {
     }
   }
 
+  public addDivider() {
+    const divider = document.createElement('div');
+    divider.className = 'toolbar-divider';
+    this.toolbar.appendChild(divider);
+  }
+
   public execCommand(command: string, value?: string) {
     this.element.focus();
     document.execCommand(command, false, value);
