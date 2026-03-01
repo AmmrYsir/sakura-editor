@@ -1,4 +1,4 @@
-import type { Plugin, Editor } from '../editor';
+import { Editor, type Plugin } from '../editor';
 
 // --- Alignment Plugin ---
 export const AlignmentPlugin: Plugin = {
@@ -9,15 +9,15 @@ export const AlignmentPlugin: Plugin = {
     container.className = 'editor-btn-group';
 
     const commands = [
-      { cmd: 'justifyLeft', icon: '左', title: 'Align Left' },
-      { cmd: 'justifyCenter', icon: '中', title: 'Align Center' },
-      { cmd: 'justifyRight', icon: '右', title: 'Align Right' },
-      { cmd: 'justifyFull', icon: '全', title: 'Justify' }
+      { cmd: 'justifyLeft', title: 'Align Left', path: '<line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/>' },
+      { cmd: 'justifyCenter', title: 'Align Center', path: '<line x1="18" y1="10" x2="6" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="18" y1="18" x2="6" y2="18"/>' },
+      { cmd: 'justifyRight', title: 'Align Right', path: '<line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/>' },
+      { cmd: 'justifyFull', title: 'Justify', path: '<line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/>' }
     ];
 
     commands.forEach(c => {
       const btn = document.createElement('button');
-      btn.innerHTML = c.icon;
+      btn.innerHTML = Editor.createIcon(c.path);
       btn.title = c.title;
       btn.onclick = () => (AlignmentPlugin as any).editor.execCommand(c.cmd);
       container.appendChild(btn);
@@ -70,7 +70,7 @@ export const CodeBlockPlugin: Plugin = {
   init: (editor: Editor) => { (CodeBlockPlugin as any).editor = editor; },
   renderToolbarButton: () => {
     const btn = document.createElement('button');
-    btn.innerHTML = '<code>{ }</code>';
+    btn.innerHTML = Editor.createIcon('<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>');
     btn.title = 'Insert Code Block';
     btn.className = 'editor-btn';
     btn.onclick = () => (CodeBlockPlugin as any).editor.execCommand('formatBlock', '<pre>');

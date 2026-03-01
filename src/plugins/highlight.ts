@@ -1,4 +1,4 @@
-import type { Plugin, Editor } from '../editor';
+import { Editor, type Plugin } from '../editor';
 
 export class HighlightPlugin implements Plugin {
   name = 'Highlight';
@@ -10,7 +10,7 @@ export class HighlightPlugin implements Plugin {
 
   renderToolbarButton() {
     const btn = document.createElement('button');
-    btn.innerHTML = '🖍️ Highlight';
+    btn.innerHTML = Editor.createIcon('<path d="M12 2l3.5 3.5L7 14l-3.5-3.5L12 2z"/><path d="M2 22l5-5-2-2-5 5v2h2z"/>');
     btn.className = 'editor-btn';
     btn.title = 'Highlight selected text';
     btn.onclick = () => {
