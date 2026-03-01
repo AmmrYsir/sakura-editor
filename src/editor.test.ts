@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeEach, spyOn } from "bun:test";
 import { Editor } from "./editor";
 import { 
-  LinkPlugin 
-} from "./plugins/core";
-import { HighlightPlugin } from "./plugins/highlight";
+  AlignmentPlugin,
+  FontStylePlugin,
+  CodeBlockPlugin
+} from "./plugins/advanced";
 
-describe("WYSIWYG Editor Plugins", () => {
+describe("WYSIWYG Advanced Plugins", () => {
   let container: any;
 
   beforeEach(() => {
@@ -20,6 +21,7 @@ describe("WYSIWYG Editor Plugins", () => {
           contentEditable: 'false',
           innerHTML: '',
           children: [] as any[],
+          value: '',
           focus: () => {},
           appendChild(child: any) {
             this.children.push(child);
@@ -27,40 +29,53 @@ describe("WYSIWYG Editor Plugins", () => {
           _onclick: null as any,
           set onclick(fn: any) { this._onclick = fn; },
           get onclick() { return this._onclick; },
-          click() { if(this._onclick) this._onclick(); }
+          click() { if(this._onclick) this._onclick(); },
+          _onchange: null as any,
+          set onchange(fn: any) { this._onchange = fn; },
+          get onchange() { return this._onchange; },
+          dispatchEvent() { if(this._onchange) this._onchange(); }
         };
         return el;
       }
     } as any;
 
-    globalThis.prompt = (_message?: string, _default?: string) => 'http://example.com';
-
     container = globalThis.document.createElement('div');
   });
 
-  it("should create link when LinkPlugin button is clicked", () => {
+  it("should apply justifyCenter when center button is clicked", () => {
     const editor = new Editor('app');
     const execSpy = spyOn(editor, 'execCommand');
-    const promptSpy = spyOn(globalThis, 'prompt').mockReturnValue('https://bun.sh');
     
-    editor.registerPlugin(LinkPlugin);
-    const linkBtn = container.children[0].children[0];
-    linkBtn.click();
+    editor.registerPlugin(AlignmentPlugin);
+    const alignGroup = container.children[0].children[0];
+    const centerBtn = alignGroup.children[1]; // justifyCenter
     
-    expect(promptSpy).toHaveBeenCalled();
-    expect(execSpy).toHaveBeenCalledWith('createLink', 'https://bun.sh');
+    centerBtn.click();
+    expect(execSpy).toHaveBeenCalledWith('justifyCenter');
   });
 
-  it("should apply highlight when HighlightPlugin button is clicked", () => {
+  it("should change font size via FontStylePlugin dropdown", () => {
     const editor = new Editor('app');
     const execSpy = spyOn(editor, 'execCommand');
-    const promptSpy = spyOn(globalThis, 'prompt').mockReturnValue('yellow');
     
-    editor.registerPlugin(new HighlightPlugin());
-    const highlightBtn = container.children[0].children[0];
-    highlightBtn.click();
+    editor.registerPlugin(FontStylePlugin);
+    const fontGroup = container.children[0].children[0];
+    const sizeSelect = fontGroup.children[1]; // size dropdown
     
-    expect(promptSpy).toHaveBeenCalled();
-    expect(execSpy).toHaveBeenCalledWith('hiliteColor', 'yellow');
+    sizeSelect.value = '5';
+    sizeSelect.dispatchEvent();
+    
+    expect(execSpy).toHaveBeenCalledWith('fontSize', '5');
+  });
+
+  it("should insert pre block when CodeBlockPlugin is clicked", () => {
+    const editor = new Editor('app');
+    const execSpy = spyOn(editor, 'execCommand');
+    
+    editor.registerPlugin(CodeBlockPlugin);
+    const codeBtn = container.children[0].children[0];
+    
+    codeBtn.click();
+    expect(execSpy).toHaveBeenCalledWith('formatBlock', '<pre>');
   });
 });

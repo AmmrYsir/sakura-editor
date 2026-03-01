@@ -32,7 +32,7 @@ body {
   flex-wrap: wrap;
 }
 
-.editor-btn, .editor-btn-group button {
+.editor-btn, .editor-btn-group button, .editor-select {
   background: white;
   border: 1px solid var(--border-color);
   border-radius: 4px;
@@ -40,9 +40,14 @@ body {
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s ease;
+  outline: none;
 }
 
-.editor-btn:hover, .editor-btn-group button:hover {
+.editor-select {
+  padding: 5px 8px;
+}
+
+.editor-btn:hover, .editor-btn-group button:hover, .editor-select:hover {
   background: var(--btn-hover);
   border-color: #ced4da;
 }

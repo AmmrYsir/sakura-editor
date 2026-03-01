@@ -9,16 +9,25 @@ import {
   ImagePlugin 
 } from './plugins/core'
 import { HighlightPlugin } from './plugins/highlight'
+import { 
+  AlignmentPlugin, 
+  FontStylePlugin, 
+  CodeBlockPlugin 
+} from './plugins/advanced'
 
 const editor = new Editor('app')
 
+// Register Plugins
+editor.registerPlugin(FontStylePlugin) // Dropdowns first
 editor.registerPlugin(BoldPlugin)
 editor.registerPlugin(ItalicPlugin)
 editor.registerPlugin(UnderlinePlugin)
+editor.registerPlugin(AlignmentPlugin)
 editor.registerPlugin(ListPlugin)
 editor.registerPlugin(LinkPlugin)
 editor.registerPlugin(ImagePlugin)
 editor.registerPlugin(new HighlightPlugin())
+editor.registerPlugin(CodeBlockPlugin)
 
 // Example of a custom "plugin" created inline to show extensibility
 editor.registerPlugin({
