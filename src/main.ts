@@ -1,24 +1,30 @@
 import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.ts'
+import { Editor } from './editor'
+import { BoldPlugin, ItalicPlugin, UnderlinePlugin, ListPlugin } from './plugins/core'
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
+const editor = new Editor('app')
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+editor.registerPlugin(BoldPlugin)
+editor.registerPlugin(ItalicPlugin)
+editor.registerPlugin(UnderlinePlugin)
+editor.registerPlugin(ListPlugin)
+
+// Example of a custom "plugin" created inline to show extensibility
+editor.registerPlugin({
+  name: 'ClearContent',
+  init: () => {},
+  renderToolbarButton: () => {
+    const btn = document.createElement('button')
+    btn.innerHTML = 'Clear'
+    btn.className = 'editor-btn'
+    btn.style.marginLeft = 'auto'
+    btn.onclick = () => {
+      if(confirm('Clear all content?')) {
+        editor.setContent('')
+      }
+    }
+    return btn
+  }
+})
+
+editor.setContent('<h1>Welcome to Sakura Editor</h1><p>Start typing here...</p>')
